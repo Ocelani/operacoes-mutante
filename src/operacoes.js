@@ -82,7 +82,7 @@ function fibonacci(n) { // Retorna o n-ésimo termo
 }
 function produtoArray(numeros) {
   if (numeros.length === 0) return 1;
-  return numeros.reduce((acc, val) => acc * val, 1);
+  return numeros.reduce((acc, val) => acc * val);
 }
 function clamp(valor, min, max) {
   if (valor < min) return min;
