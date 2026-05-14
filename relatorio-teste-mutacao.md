@@ -8,11 +8,17 @@ Otávio Celani
 
 ## 1. Análise inicial
 
-Na primeira execução do StrykerJS sobre `src/operacoes.js`, a pontuação de mutação total ficou em torno de **78%** (valor agregado próximo de 77,9%), com dezenas de mutantes sobreviventes e oito mutantes sem cobertura de teste (`NoCoverage`), ou seja, trechos de código que os testes nem sequer exercitavam de forma a permitir avaliar mutações ali injetadas.
+As figuras a seguir documentam o estado da primeira execução: o relatório HTML do Stryker no navegador e o resumo de cobertura emitido pelo Jest no terminal.
 
-Em paralelo, a **cobertura de código** medida pelo Jest (instruções, ramos e funções) sobre o mesmo arquivo já se apresentava **elevada**, aproximando-se da cobertura total, porque a suíte inicial previa, em regra, **um caso por função exportada**, o que garante que quase todas as linhas sejam percorridas ao menos uma vez.
+![Relatório HTML do Stryker na primeira execução: pontuação de mutação, distribuição de mutantes e trecho de `operacoes.js` com mutantes sobreviventes ou sem cobertura.](img/output_navegador_primeiro_teste.png)
 
-A **discrepância** entre cobertura alta e pontuação de mutação modesta é esperável: a cobertura tradicional indica *se* o código foi executado, não *se* os testes discriminem comportamentos corretos e incorretos. Asserções fracas (por exemplo, apenas o valor esperado "feliz" ou `toThrow()` sem mensagem) deixam passar variantes do programa que ainda satisfazem os mesmos testes, o que o teste de mutação torna explícito.
+*Figura 1.* Relatório do Stryker para `src/operacoes.js`: **73,71%** de pontuação de mutação total, **78,11%** sobre código coberto, **213** mutantes no total (**154** mortos, **44** sobreviventes, **12** sem cobertura, **3** em tempo esgotado). A barra superior e os marcadores no código (por exemplo, em `divisao` e `raizQuadrada`) evidenciam onde a suíte ainda não discrimina ou nem executa o trecho mutado.
+
+![Saída do terminal com a tabela de cobertura Jest após a primeira suíte de testes.](img/output_terminal_primeiro_teste.png)
+
+*Figura 2.* Cobertura Jest sobre `operacoes.js`: **85,41%** de instruções, **58,82%** de ramos, **100%** de funções e **98,64%** de linhas (com linha **112** ainda listada como não coberta). Os cinquenta testes passaram, o que reforça que "tudo verde" na suíte não implica suíte forte frente a mutações.
+
+Em conjunto, as duas figuras ilustram a **discrepância** entre métricas de cobertura (em especial linhas e funções elevadas) e a **pontuação de mutação global inferior** (~74%). A cobertura tradicional indica *se* o código foi exercitado; o teste de mutação indica *se* os testes **detectam** alterações semânticas. Ramos pouco cobertos (**58,82%**) e dezenas de sobreviventes alinham-se a asserções ainda genéricas (por exemplo, `toThrow()` sem mensagem ou um único caso "feliz" por função), que deixam passar variantes defeituosas do programa.
 
 ---
 
@@ -53,10 +59,10 @@ Foram acrescentados **casos de borda e asserções mais fortes** nos testes já 
 - **Mediana:** entradas **desordenadas** com comprimento ímpar, entradas de **comprimento par** (média dos dois centrais) e chamada com **array vazio** com `toThrow` incluindo trecho da mensagem esperada, forçando ordenação, ramo par e validação de erro.
 - **Divisão por zero:** `toThrow` com a **mensagem literal** esperada, de modo que o mutante que esvazia a string deixe de passar.
 - **Raiz quadrada, fatorial, inverso, max/min da lista vazia, mediana vazia:** combinação de valores válidos (por exemplo, `raizQuadrada(0)`, `fatorial(0)` e `fatorial(1)`) com entradas inválidas e mensagens de erro explícitas, cobrindo condições `if` e literais previamente sem cobertura ou fracos perante mutações.
-- `**isPar` / `isImpar`:** expectativas `false` para entradas de paridade oposta, destruindo mutantes que fixam `return true` ou alteram o operador aritmético.
-- `**isPrimo`:** expectativas para `2`, compostos (`4`, `9`) e não-primos limite (`0`, `1`), obrigando o laço e os retornos antecipados a produzir resultados distintos dos mutantes degradados.
-- `**mediaArray` / `produtoArray`:** array vazio; em código, `produtoArray` passou a usar `reduce` sem valor inicial redundante, de forma que o guard de array vazio deixe de ser **semanticamente redundante** perante o `reduce`.
-- `**clamp`:** valores abaixo do mínimo, acima do máximo e intervalos **inválidos** (`min` e `max` em ordem não usual), discriminando ramos `if` e operadores de comparação.
+- **`isPar` / `isImpar`:** expectativas `false` para entradas de paridade oposta, destruindo mutantes que fixam `return true` ou alteram o operador aritmético.
+- **`isPrimo`:** expectativas para `2`, compostos (`4`, `9`) e não-primos limite (`0`, `1`), obrigando o laço e os retornos antecipados a produzir resultados distintos dos mutantes degradados.
+- **`mediaArray` / `produtoArray`:** array vazio; em código, `produtoArray` passou a usar `reduce` sem valor inicial redundante, de forma que o guard de array vazio deixe de ser **semanticamente redundante** perante o `reduce`.
+- **`clamp`:** valores abaixo do mínimo, acima do máximo e intervalos **inválidos** (`min` e `max` em ordem não usual), discriminando ramos `if` e operadores de comparação.
 - **Conversões térmicas:** segundo ponto de referência (`100 °C` ↔ `212 °F`) para resistir a mutações aritméticas em expressões com divisão encadeada.
 - **Comparações (`isMaiorQue`, `isMenorQue`, `isEqual`):** casos `false` e empates, evitando que `return true` ou relaxamentos `>=` / `<=` passem despercebidos.
 
